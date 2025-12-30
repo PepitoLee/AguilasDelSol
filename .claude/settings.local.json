@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(frontend-design:frontend-design)",
+      "Bash(dir /s /b)",
+      "Bash(npm run build:*)",
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(copy \"e:\\\\Ads Video 1080P.mp4\" \"E:\\\\Nueva carpeta\\\\ads-security \\(1\\)\\\\public\\\\videos\\\\ads-intro.mp4\")",
+      "Bash(cmd /c \"if not exist \"\"E:\\\\Nueva carpeta\\\\ads-security \\(1\\)\\\\public\\\\videos\"\" mkdir \"\"E:\\\\Nueva carpeta\\\\ads-security \\(1\\)\\\\public\\\\videos\"\" && copy \"\"e:\\\\Ads Video 1080P.mp4\"\" \"\"E:\\\\Nueva carpeta\\\\ads-security \\(1\\)\\\\public\\\\videos\\\\ads-intro.mp4\"\"\")",
+      "Bash(cmd /c \"dir \"\"E:\\\\Nueva carpeta\\\\ads-security \\(1\\)\\\\public\\\\videos\"\"\")",
+      "Bash(powershell:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
