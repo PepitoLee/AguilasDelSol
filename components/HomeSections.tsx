@@ -238,39 +238,77 @@ export const HomeServices = () => {
     const triggerRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+    );
+    const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+        const checkMobile = () => {
+            const mobile = window.innerWidth < 1024;
+            setIsMobile(mobile);
+        };
         checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+
+        // Mark as ready after a short delay to ensure DOM is measured correctly
+        const readyTimer = setTimeout(() => setIsReady(true), 200);
+
+        // Refresh ScrollTrigger on resize (important for orientation changes)
+        let resizeTimer: NodeJS.Timeout;
+        const handleResize = () => {
+            checkMobile();
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                ScrollTrigger.refresh();
+            }, 250);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(readyTimer);
+            clearTimeout(resizeTimer);
+        };
     }, []);
 
     // GSAP horizontal scroll on vertical scroll - works on BOTH mobile and desktop
     useLayoutEffect(() => {
-        // Small delay to ensure DOM is ready and measurements are accurate
-        const timer = setTimeout(() => {
-            const ctx = gsap.context(() => {
-                if (!containerRef.current || !triggerRef.current) return;
+        if (!isReady) return;
 
-                const scrollWidth = containerRef.current.scrollWidth;
-                const viewportWidth = triggerRef.current.offsetWidth;
+        let ctx: gsap.Context | null = null;
+
+        // Longer delay for mobile to ensure DOM is fully ready
+        const timer = setTimeout(() => {
+            if (!containerRef.current || !triggerRef.current) return;
+
+            ctx = gsap.context(() => {
+                const container = containerRef.current!;
+                const trigger = triggerRef.current!;
+
+                // Force recalculation of dimensions
+                ScrollTrigger.refresh();
+
+                const scrollWidth = container.scrollWidth;
+                const viewportWidth = trigger.offsetWidth;
                 const distance = scrollWidth - viewportWidth;
 
                 if (distance <= 0) return;
 
                 // Horizontal Scroll - same experience on mobile and desktop
-                gsap.to(containerRef.current, {
+                gsap.to(container, {
                     x: -distance,
                     ease: "none",
                     scrollTrigger: {
-                        trigger: triggerRef.current,
+                        trigger: trigger,
                         pin: true,
-                        scrub: isMobile ? 0.8 : 0.5, // Slightly smoother on mobile
-                        end: () => "+=" + (distance * (isMobile ? 1.2 : 1.5)),
+                        pinSpacing: true,
+                        scrub: isMobile ? 1 : 0.5,
+                        start: "top top",
+                        end: () => "+=" + (distance * (isMobile ? 1.5 : 1.5)),
                         invalidateOnRefresh: true,
-                        anticipatePin: 1, // Helps with mobile performance
+                        anticipatePin: 1,
+                        fastScrollEnd: true,
+                        preventOverlaps: true,
                         onUpdate: (self) => {
                             if (progressBarRef.current) {
                                 gsap.set(progressBarRef.current, { scaleX: self.progress });
@@ -286,7 +324,7 @@ export const HomeServices = () => {
                             xPercent: 15,
                             ease: "none",
                             scrollTrigger: {
-                                trigger: triggerRef.current,
+                                trigger: trigger,
                                 start: "top top",
                                 end: () => "+=" + (distance * 1.5),
                                 scrub: true,
@@ -298,11 +336,18 @@ export const HomeServices = () => {
 
             }, sectionRef);
 
-            return () => ctx.revert();
-        }, 100);
+        }, isMobile ? 300 : 150);
 
-        return () => clearTimeout(timer);
-    }, [isMobile]);
+        return () => {
+            clearTimeout(timer);
+            if (ctx) ctx.revert();
+            ScrollTrigger.getAll().forEach(st => {
+                if (st.trigger === triggerRef.current) {
+                    st.kill();
+                }
+            });
+        };
+    }, [isMobile, isReady]);
 
     return (
         <section ref={sectionRef} className="bg-black relative overflow-hidden">
@@ -374,6 +419,13 @@ export const HomeServices = () => {
                 }
                 .scrollbar-hide::-webkit-scrollbar {
                     display: none;
+                }
+                /* Mobile touch scrolling fix */
+                @media (max-width: 1023px) {
+                    .pin-spacer {
+                        touch-action: pan-y !important;
+                        -webkit-overflow-scrolling: touch !important;
+                    }
                 }
             `}</style>
         </section>
