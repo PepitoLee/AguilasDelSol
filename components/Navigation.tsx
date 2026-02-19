@@ -9,7 +9,8 @@ const navItems = [
   { label: 'Quiénes Somos', path: '/nosotros', code: '003' },
   { label: 'Historia', path: '/historia', code: '004' },
   { label: 'Documentación', path: '/documentacion', code: '005' },
-  { label: 'Contacto', path: '/contacto', code: '006' },
+  { label: 'Blog', path: '/blog', code: '006' },
+  { label: 'Contacto', path: '/contacto', code: '007' },
 ];
 
 // Tactical scan line effect

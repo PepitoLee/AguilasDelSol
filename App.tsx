@@ -9,6 +9,8 @@ import About from './pages/About';
 import History from './pages/History';
 import Documentation from './pages/Documentation';
 import Contact from './pages/Contact';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import Footer from './components/Footer';
 
 // Componente para resetear scroll al cambiar de página
@@ -48,6 +50,8 @@ const AnimatedRoutes = () => {
           <Route path="/nosotros" element={<About />} />
           <Route path="/historia" element={<History />} />
           <Route path="/documentacion" element={<Documentation />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contacto" element={<Contact />} />
         </Routes>
       </AnimatePresence>
